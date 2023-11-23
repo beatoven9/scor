@@ -1,9 +1,13 @@
 import argparse
-import datetime
-from os import getenv, path
+from os import getenv
 from pathlib import Path
 from typing import List, Optional
 from scor.mapping import run_command_across_nodes
+from scor.cmd_parsing import (
+    process_command,
+    create_base_dir_path_check_commands,
+    create_sub_dir_path_check_commands,
+)
 
 
 def main():
@@ -56,12 +60,6 @@ def run_command_on_all_nodes(
     run_command_across_nodes(command_tokens, node_list)
 
 
-def create_uid():
-    time_now = datetime.datetime.now()
-    time_string = time_now.strftime("%d_%m_%y__%H_%M_%S_%f")
-    return time_string
-
-
 def check_config_dirs(config_dir: Path, node_list: List[str]):
     path_check_command_list = create_base_dir_path_check_commands(
         config_dir,
@@ -76,29 +74,6 @@ def check_config_dirs(config_dir: Path, node_list: List[str]):
     run_command_across_nodes(subdir_path_check_command_list, node_list)
 
 
-def create_base_dir_path_check_commands(
-    config_dir: Path,
-):
-    command = 'if [ ! -d "{0}" ]; then mkdir {0}; fi'.format(config_dir)
-    command_tokens = tokenize_command(command)
-    return command_tokens
-
-
-def get_config_subdir_path(config_path: Path, node: str):
-    return path.join(config_path, node)
-
-
-def create_sub_dir_path_check_commands(config_dir: Path, node_list: List[str]):
-    command_token_list = []
-    for node in node_list:
-        sub_dir = get_config_subdir_path(config_dir, node)
-        command = 'if [ ! -d "{0}" ]; then mkdir {0}; fi'.format(sub_dir)
-        command_tokens = tokenize_command(command)
-        command_token_list.append(command_tokens)
-
-    return command_token_list
-
-
 def get_cli_args():
     parser = argparse.ArgumentParser(
         prog="Capvt Package Manager",
@@ -108,32 +83,6 @@ def get_cli_args():
     args = parser.parse_args()
 
     return args.command
-
-
-def process_command(
-    command_string: str,
-    config_dir: Path,
-    node_list: List[str],
-) -> List[str]:
-    command_tokens = tokenize_command(command_string)
-
-    uid = create_uid()
-    commands_list = []
-    for node in node_list:
-        subdir_path = get_config_subdir_path(config_dir, node)
-        log_filename = node + "__" + str(uid) + ".log"
-        err_filename = node + "__" + str(uid) + ".err"
-        log_path = path.join(subdir_path, log_filename)
-        err_path = path.join(subdir_path, err_filename)
-        new_command = command_tokens + ["1>", str(log_path), "2>", str(err_path)]
-        commands_list.append(new_command)
-
-    return commands_list
-
-
-def tokenize_command(command_string: str):
-    tokenized_command = command_string.split()
-    return tokenized_command
 
 
 if __name__ == "__main__":
