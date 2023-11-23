@@ -1,5 +1,5 @@
-#This honestly could be usefule as a simple command runner.
-#Maybe the outputs could be saved to files, one per node.
+# This honestly could be usefule as a simple command runner.
+# Maybe the outputs could be saved to files, one per node.
 # Output must be captured. There should probably be a way of getting prompted.
 # 
 A simple package-manager wrapper for installing/uninstalling packages on all nodes.
@@ -25,3 +25,12 @@ I should do some tests first.
 5. create an env variable for the node list. and read from it.
 6. if there is no env variable ask them to list their nodes hostnames.
 7. output the correct env variable and suggest the user paste it into their .bashrc file.
+
+
+
+
+Other ideas:
+
+I should write scripts to do the rest of these tasks using the command runner.
+I should figure out how to install it as a module.
+
