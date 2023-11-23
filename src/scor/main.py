@@ -13,6 +13,15 @@ def main():
 
 
 def run_command(command_string: str, node_list: Optional[List[str]] = None):
+    """
+    This is the main interface of the program.
+
+    --User can have environment variable "NODE_LIST" set to the
+    hostnames of the nodes you wish to target.
+
+    --Alternatively, you can provide a list of hostnames.
+    """
+
     config_dir = "~/.cpm/"
 
     if node_list is None:
