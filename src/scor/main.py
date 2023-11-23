@@ -1,10 +1,10 @@
-import datetime
-from typing import Union, List, Optional
-import threading
 import argparse
+import datetime
 import subprocess
+import threading
+from os import getenv, path
 from pathlib import Path
-from os import path, getenv
+from typing import List, Optional, Union
 
 
 def main():
@@ -49,9 +49,7 @@ def process_node_list(node_list_var):
 
 
 def run_command_on_all_nodes(
-    command_string: str,
-    config_dir: Path,
-    node_list: List[str]
+    command_string: str, config_dir: Path, node_list: List[str]
 ):
     check_config_dirs(config_dir, node_list)
     command_tokens = process_command(command_string, config_dir, node_list)
@@ -61,14 +59,11 @@ def run_command_on_all_nodes(
 
 def create_uid():
     time_now = datetime.datetime.now()
-    time_string = time_now.strftime('%d_%m_%y__%H_%M_%S_%f')
+    time_string = time_now.strftime("%d_%m_%y__%H_%M_%S_%f")
     return time_string
 
 
-def check_config_dirs(
-    config_dir: Path,
-    node_list: List[str]
-):
+def check_config_dirs(config_dir: Path, node_list: List[str]):
     path_check_command_list = create_base_dir_path_check_commands(
         config_dir,
     )
@@ -85,7 +80,7 @@ def check_config_dirs(
 def create_base_dir_path_check_commands(
     config_dir: Path,
 ):
-    command = "if [ ! -d \"{0}\" ]; then mkdir {0}; fi".format(config_dir)
+    command = 'if [ ! -d "{0}" ]; then mkdir {0}; fi'.format(config_dir)
     command_tokens = tokenize_command(command)
     return command_tokens
 
@@ -94,14 +89,11 @@ def get_config_subdir_path(config_path: Path, node: str):
     return path.join(config_path, node)
 
 
-def create_sub_dir_path_check_commands(
-    config_dir: Path,
-    node_list: List[str]
-):
+def create_sub_dir_path_check_commands(config_dir: Path, node_list: List[str]):
     command_token_list = []
     for node in node_list:
         sub_dir = get_config_subdir_path(config_dir, node)
-        command = "if [ ! -d \"{0}\" ]; then mkdir {0}; fi".format(sub_dir)
+        command = 'if [ ! -d "{0}" ]; then mkdir {0}; fi'.format(sub_dir)
         command_tokens = tokenize_command(command)
         command_token_list.append(command_tokens)
 
@@ -110,10 +102,10 @@ def create_sub_dir_path_check_commands(
 
 def get_cli_args():
     parser = argparse.ArgumentParser(
-        prog='Capvt Package Manager',
-        description='Simple apt wrapper for clusters',
+        prog="Capvt Package Manager",
+        description="Simple apt wrapper for clusters",
     )
-    parser.add_argument('command')
+    parser.add_argument("command")
     args = parser.parse_args()
 
     return args.command
@@ -134,12 +126,7 @@ def process_command(
         err_filename = node + "__" + str(uid) + ".err"
         log_path = path.join(subdir_path, log_filename)
         err_path = path.join(subdir_path, err_filename)
-        new_command = command_tokens + [
-            "1>",
-            str(log_path),
-            "2>",
-            str(err_path)
-        ]
+        new_command = command_tokens + ["1>", str(log_path), "2>", str(err_path)]
         commands_list.append(new_command)
 
     return commands_list
@@ -160,7 +147,7 @@ def run_command_across_nodes(
         List[str],
         List[List[str]],
     ],
-    node_list: List[str]
+    node_list: List[str],
 ):
     def spawn_thread(command_tokens):
         command = [
@@ -170,10 +157,7 @@ def run_command_across_nodes(
         ]
 
         print("Running command: ", " ".join(command))
-        new_thread = threading.Thread(
-            target=subprocess_wrapper,
-            args=[command]
-        )
+        new_thread = threading.Thread(target=subprocess_wrapper, args=[command])
         return new_thread
 
     threads = []
@@ -199,11 +183,7 @@ def run_command_across_nodes(
 
 
 def subprocess_wrapper(command: List[str]):
-    result = subprocess.run(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     return result
 
