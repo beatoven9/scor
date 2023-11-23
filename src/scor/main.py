@@ -1,10 +1,9 @@
 import argparse
 import datetime
-import subprocess
-import threading
 from os import getenv, path
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
+from scor.mapping import run_command_across_nodes
 
 
 def main():
@@ -22,7 +21,7 @@ def run_command(command_string: str, node_list: Optional[List[str]] = None):
     --Alternatively, you can provide a list of hostnames.
     """
 
-    config_dir = "~/.cpm/"
+    config_dir = "~/.scor/"
 
     if node_list is None:
         node_list = get_node_list()
@@ -135,57 +134,6 @@ def process_command(
 def tokenize_command(command_string: str):
     tokenized_command = command_string.split()
     return tokenized_command
-
-
-def run_commands(command_tokens):
-    result = subprocess.run(command_tokens, stdout=subprocess.PIPE)
-    return result
-
-
-def run_command_across_nodes(
-    command_tokens: Union[
-        List[str],
-        List[List[str]],
-    ],
-    node_list: List[str],
-):
-    def spawn_thread(command_tokens):
-        command = [
-            "ssh",
-            node,
-            " ".join(command_tokens),
-        ]
-
-        print("Running command: ", " ".join(command))
-        new_thread = threading.Thread(target=subprocess_wrapper, args=[command])
-        return new_thread
-
-    threads = []
-    if isinstance(command_tokens[0], str):
-        # spawn one thread per node
-        for node in node_list:
-            new_thread = spawn_thread(command_tokens)
-            threads.append(new_thread)
-            new_thread.start()
-
-    elif isinstance(command_tokens[0], List):
-        for command, node in zip(command_tokens, node_list):
-            new_thread = spawn_thread(command)
-            threads.append(new_thread)
-            new_thread.start()
-
-    print("----Waiting for all jobs to complete.")
-    # wait for threads to complete
-    for thread in threads:
-        thread.join()
-
-    print("\nCOMPLETE!\n")
-
-
-def subprocess_wrapper(command: List[str]):
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    return result
 
 
 if __name__ == "__main__":
