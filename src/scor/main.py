@@ -1,4 +1,3 @@
-# from collections.abc import Sequence
 import datetime
 from typing import Union, List, Optional
 import threading
