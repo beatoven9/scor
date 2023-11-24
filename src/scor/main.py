@@ -1,3 +1,12 @@
+# I need to pull the config_dir checks into their own thing.
+# I mean ultimately, this is not the right way to do this, right?
+# I should really just have the creation of those be in the same
+# ssh command. totally possible, potentially annoying.
+# This won't be hard. I just need to do a 'mkdir -p .scor/$(hostname)';
+# Right before the other call in the ssh thing
+#
+# Also, I need to get the get_nodes_list stuff into its own module.
+#
 import argparse
 from os import getenv
 from pathlib import Path
